@@ -20,32 +20,28 @@ io.on('connection', (socket) => {
     });
 
     // Connect the Player 2 to the room he requested. Show error if room full.
-    socket.on('joinGame', function (data) {
+    socket.on('joinGame', function(data) {
+        console.log("join game " + JSON.stringify(data))
+
         var room = io.nsps['/'].adapter.rooms[data.room];
-        if (room && room.length === 1) {
+        if (room) {
             socket.join(data.room);
-            socket.broadcast.to(data.room).emit('player1', {});
-            socket.emit('player2', { name: data.name, room: data.room })
+            socket.emit('newGame', { name: data.name, room: `room-${rooms}` });
+            io.to(data.room).emit('playerJoined', {
+                room: data.room,
+                player: data.name
+            });
         } else {
-            socket.emit('err', { message: 'Sorry, The room is full!' });
+            socket.emit('err', { message: 'Sorry, the room does not exist' });
         }
     });
 
-    /**
-       * Handle the turn played by either player and notify the other.
-       */
-    socket.on('playTurn', (data) => {
-        socket.broadcast.to(data.room).emit('turnPlayed', {
-            tile: data.tile,
+    socket.on('startGame', function(data) {
+        console.log("start game " + JSON.stringify(data))
+        var room = io.nsps['/'].adapter.rooms[data.room];
+        io.to(data.room).emit('gameOn', {
             room: data.room
         });
-    });
-
-    /**
-       * Notify the players about the victor.
-       */
-    socket.on('gameEnded', (data) => {
-        socket.broadcast.to(data.room).emit('gameEnd', data);
     });
 });
 

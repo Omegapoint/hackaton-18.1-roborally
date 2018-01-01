@@ -5,6 +5,10 @@
 	font-family: Helvetica;
 }
 
+.waiting {
+	display: none;
+}
+
 .gameBoard{
 	display: none;
 }
