@@ -1,9 +1,12 @@
 {
-  "name": "socket-chat-example",
+  "name": "gj-game1",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "first game attempt for the OPHack Game Jam",
   "dependencies": {
     "express": "^4.15.2",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "skeleton": "^0.1.2",
+    "skeleton-css": "^2.0.4",
+    "jquery": "^3.1.1"
   }
 }
