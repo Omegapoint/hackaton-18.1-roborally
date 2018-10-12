@@ -25,7 +25,10 @@
             console.log("Robot: " + JSON.stringify(r));
             $(`#tile-${r.position.x}-${r.position.y}`).html(`<img class="robot" id="${r}" src="${r.robot.avatar}"/>`);
         });
+    }
 
+    function announceWinner(robot) {
+        $('#userHello').html("The winner is " + robot.playerName);
     }
 
     // Create a new game. Emit newGame event.
@@ -58,9 +61,9 @@
     });
 
     $('#commitRegisters').on('click', () => {
-      const registers = _.split($('#registers').val(), ",");
-      let cards = JSON.parse($('#cards').html());
-      let commitRegisters = _.map(registers, (index)=>cards[index]);
+        const registers = _.split($('#registers').val(), ",");
+        let cards = JSON.parse($('#cards').html());
+        let commitRegisters = _.map(registers, (index) => cards[index]);
         socket.emit('commitRegisters', { registers: commitRegisters });
     });
 
@@ -91,7 +94,11 @@
     });
 
     socket.on('updateBoard', (data) => {
-      updateBoard(data.board);
+        updateBoard(data.board);
+    });
+
+    socket.on('announceWinner', (data) => {
+        announceWinner(data.robot);
     });
 
     socket.on('err', (data) => {

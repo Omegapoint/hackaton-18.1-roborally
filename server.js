@@ -50,11 +50,17 @@ class Director {
     }
 
     playRound() {
-        this.board.playRegister(0);
+        let winner = this.board.playRegister(0);
         let director = this;
         _.forEach(this.players, function(player) {
             player.updateBoard(director.board);
         });
+        if (winner !== undefined) {
+            _.forEach(this.players, function(player) {
+                player.announceWinner(winner);
+            });
+            // TODO: kill everything
+        }
     }
 }
 
@@ -82,6 +88,10 @@ class Player {
 
     updateBoard(board) {
         this.socket.emit("updateBoard", { board });
+    }
+
+    announceWinner(robot) {
+        this.socket.emit("announceWinner", { robot });
     }
 }
 
@@ -151,11 +161,18 @@ class Board {
         }]);
 
         let board = this;
+        let winner = undefined;
 
         _.forEach(sortedRobots, function(robot) {
             let card = robot.getRegister(registerId);
             board.moveRobot(robot, card);
+            let newPosition = board.robots[robot.playerName].position;
+            if (newPosition.y === board.size_y - 1) {
+                winner = robot;
+                return false;
+            }
         });
+        return winner;
     }
 
     moveRobot(robot, card) {
