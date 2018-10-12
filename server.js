@@ -165,8 +165,8 @@ class Board {
     }
 
     playRegister(registerId) {
-        let robots = _.map(this.robots, 'robot');
-        let sortedRobots = _.sortBy(robots, [function(robot) {
+        let aliveRobots = _.filter(_.map(this.robots, 'robot'), {'status': 'ALIVE'});
+        let sortedRobots = _.sortBy(aliveRobots, [function(robot) {
             return robot.getRegister(registerId).priority;
         }]);
 
@@ -180,6 +180,9 @@ class Board {
             if (newPosition.y === board.size_y - 1) {
                 winner = robot;
                 return false;
+            }
+            if (newPosition.y >= board.size_y) {
+            	robot.die();
             }
         });
         return winner;
@@ -210,6 +213,7 @@ class Robot {
         this.avatar = '/app/images/duck.png';
         this.playerName = playerName;
         this.registers = [];
+        this.status = "ALIVE";
     }
 
     commitRegisters(registers) {
@@ -223,6 +227,11 @@ class Robot {
 
     getRegister(registerId) {
         return this.registers[registerId];
+    }
+
+    die() {
+    	this.status = "DEAD";
+    	console.log("Robot died: " + this.playerName);
     }
 }
 

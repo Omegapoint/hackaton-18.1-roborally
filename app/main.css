@@ -1,37 +1,56 @@
-.tile{
-	width: 80px;
-	height: 80px;
-	font-size: 60px;
-	font-family: Helvetica;
+.tile {
+    width: 80px;
+    height: 80px;
+    font-size: 60px;
+    font-family: Helvetica;
 }
 
 .waiting {
-	display: none;
+    display: none;
 }
 
-.gameBoard{
-	display: none;
+.gameBoard {
+    display: none;
 }
 
-.center{
-	margin: 0 auto;
+.center {
+    margin: 0 auto;
 }
 
 .row {
-	display: block;
+    display: block;
 }
 
 .tile {
-	display: inline-block;
-	position: relative;
-	width: 100px;
-	height: 100px;
-	background-color: #E9C372;
-	margin: 2px;
-	font-size: 10px;
+    display: inline-block;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color: #E9C372;
+    margin: 2px;
+    font-size: 10px;
 }
 
 .robot {
-	width: 70px;
-	height: 70px;
+    width: 70px;
+    height: 70px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    color: white;
+    text-shadow:
+        -1px -1px 0 #fff,
+        1px -1px 0 #fff,
+        -1px 1px 0 #fff,
+        1px 1px 0 #fff;
+}
+
+html {
+    background: url('images/maxresdefault.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }

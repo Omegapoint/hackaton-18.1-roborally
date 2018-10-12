@@ -1,47 +1,43 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Tic Tac Toe</title>
-		<link rel="stylesheet" href="app/main.css">
-		<link rel="stylesheet" href="node_modules/skeleton-css/css/skeleton.css">
-	</head>
-	<body>
-		<div class="container">
-			<h2 id="userHello">This is a board</h2>
-			<div class="lobby">
-				<h1>Tic - Tac - Toe</h1>
-				<h3>How To Play</h3>
-				<ol>
-					<li>Player 1 Create a new game by entering the username</li>
-					<li>Player 2 Enter another username and the room id that is displayed on first window.</li>
-					<li>Click on join game. </li>
-				</ol>
-				<h4>Create a new Game</h4>
-				<input type="text" name="name" id="nameNew" placeholder="Enter your name" required>
-				<button id="new">New Game</button>
-				<br><br>
-				<h4>Join an existing game</h4>
-				<input type="text" name="name" id="nameJoin" placeholder="Enter your name" required>
-				<input type="text" name="room" id="room" placeholder="Enter Game ID" required>
-				<button id="join">Join Game</button>
-			</div>
-			<div class="waiting">
-				<h1>waiting on other players</h1>
-				//TODO list of plaiers
-				<button id="start">Start</button>
-			</div>
-			<div class="gameBoard">
-				<div id="factoryFloor"></div>
-				<div id="console">
-					<div id="cards">No cards yet</div>
-					<input type="text" name="registers" id="registers" placeholder="Enter comma-separated UUIDs">
-					<button id="commitRegisters">Commit registers</button>
-				</div>
-			</div>
-		</div>
-		<script src="node_modules/jquery/dist/jquery.min.js"></script>
-		<script src="node_modules/lodash/lodash.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="app/main.js"></script>
-	</body>
+
+<head>
+    <title>Roborallyt</title>
+    <link rel="stylesheet" href="app/main.css">
+    <link rel="stylesheet" href="node_modules/skeleton-css/css/skeleton.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2 id="userHello">This is a board</h2>
+        <div class="lobby">
+            <h1>Robborallyt</h1>
+            <h4>Create a new Game</h4>
+            <input type="text" name="name" id="nameNew" placeholder="Enter your name" required>
+            <button id="new">New Game</button>
+            <br><br>
+            <h4>Join an existing game</h4>
+            <input type="text" name="name" id="nameJoin" placeholder="Enter your name" required>
+            <input type="text" name="room" id="room" placeholder="Enter Game ID" required>
+            <button id="join">Join Game</button>
+        </div>
+        <div class="waiting">
+            <h1>Waiting for other players</h1>
+            <button id="start">Start</button>
+        </div>
+        <div class="gameBoard">
+            <div id="factoryFloor"></div>
+            <div id="console">
+                <div id="cards">No cards yet</div>
+                <input type="text" name="registers" id="registers" placeholder="Enter comma-separated UUIDs">
+                <button id="commitRegisters">Commit registers</button>
+            </div>
+        </div>
+    </div>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/lodash/lodash.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app/main.js"></script>
+</body>
+
 </html>
