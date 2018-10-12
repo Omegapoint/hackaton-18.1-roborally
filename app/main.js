@@ -20,6 +20,7 @@
     }
 
     function updateBoard(board) {
+        $('.robot').remove();
         _.forEach(board.robots, function(r) {
             console.log("Robot: " + JSON.stringify(r));
             $(`#tile-${r.position.x}-${r.position.y}`).html(`<img class="robot" id="${r}" src="${r.robot.avatar}"/>`);
@@ -87,6 +88,10 @@
 
     socket.on('give', (data) => {
         $('#cards').html(JSON.stringify(data));
+    });
+
+    socket.on('updateBoard', (data) => {
+      updateBoard(data.board);
     });
 
     socket.on('err', (data) => {

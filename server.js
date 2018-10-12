@@ -43,9 +43,18 @@ class Director {
         this.board.commitRegisters(player.name, registers);
         if (this.board.areAllRobotsCommitted()) {
             console.log("All players are ready");
+            this.playRound();
         } else {
             console.log("Not all players are ready");
         }
+    }
+
+    playRound() {
+        this.board.playRegister(0);
+        let director = this;
+        _.forEach(this.players, function(player) {
+            player.updateBoard(director.board);
+        });
     }
 }
 
@@ -69,6 +78,10 @@ class Player {
     commitRegisters(data) {
         console.log("commitRegisters " + JSON.stringify(data));
         this.director.readyPlayer(this, data.registers);
+    }
+
+    updateBoard(board) {
+        this.socket.emit("updateBoard", { board });
     }
 }
 
@@ -130,12 +143,38 @@ class Board {
         });
         return _.isEmpty(notReady);
     }
+
+    playRegister(registerId) {
+        let robots = _.map(this.robots, 'robot');
+        let sortedRobots = _.sortBy(robots, [function(robot) {
+            return robot.getRegister(registerId).priority;
+        }]);
+
+        let board = this;
+
+        _.forEach(sortedRobots, function(robot) {
+            let card = robot.getRegister(registerId);
+            board.moveRobot(robot, card);
+        });
+    }
+
+    moveRobot(robot, card) {
+        console.log("Move Robot: " + JSON.stringify(robot) + " - card: " + JSON.stringify(card));
+        let position = this.robots[robot.playerName].position;
+        this.robots[robot.playerName].position = position.plusNorth(card.steps);
+        console.log("Robot position is now " + JSON.stringify(this.robots[robot.playerName].position));
+    }
 }
 
 class Position {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+    }
+
+    plusNorth(steps) {
+        console.log("steps " + steps);
+        return new Position(this.x, this.y + steps);
     }
 }
 
@@ -147,12 +186,16 @@ class Robot {
     }
 
     commitRegisters(registers) {
-        this.registers = [registers];
+        this.registers = registers;
         console.log("Robot says registers " + JSON.stringify(registers));
     }
 
     clearRegisters() {
         this.registers = [];
+    }
+
+    getRegister(registerId) {
+        return this.registers[registerId];
     }
 }
 
