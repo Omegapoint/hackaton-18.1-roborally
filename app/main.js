@@ -57,8 +57,10 @@
     });
 
     $('#commitRegisters').on('click', () => {
-      const registers = $('#registers').val();
-        socket.emit('commitRegisters', { registers: registers });
+      const registers = _.split($('#registers').val(), ",");
+      let cards = JSON.parse($('#cards').html());
+      let commitRegisters = _.map(registers, (index)=>cards[index]);
+        socket.emit('commitRegisters', { registers: commitRegisters });
     });
 
     // New Game created by current client. Update the UI and create new Game var.

@@ -26,18 +26,25 @@ class Director {
     }
 
     deal() {
+        let board = this.board;
+        let director = this;
         _.forEach(this.players, function(player) {
-            player.receiveCards([new Card(1), new Card(0), new Card(1)]);
+            board.robots[player.name].robot.clearRegisters();
+            player.receiveCards([new Card(1, director.getRandomInt(200)), new Card(0, director.getRandomInt(200)), new Card(1, director.getRandomInt(200))]);
         });
     }
 
+    getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+
     readyPlayer(player, registers) {
-    	console.log("Ready player " + player.name);
+        console.log("Ready player " + player.name);
         this.board.commitRegisters(player.name, registers);
         if (this.board.areAllRobotsCommitted()) {
-        	console.log("All players are ready");
+            console.log("All players are ready");
         } else {
-        	console.log("Not all players are ready");
+            console.log("Not all players are ready");
         }
     }
 }
@@ -47,6 +54,7 @@ class Player {
         this.name = name;
         this.socket = socket;
         this.director = director;
+        this.hand = [];
 
         this.socket.on('commitRegisters', (data) => {
             this.commitRegisters(data);
@@ -55,6 +63,7 @@ class Player {
 
     receiveCards(cards) {
         this.socket.emit("give", cards);
+        this.hand = cards;
     }
 
     commitRegisters(data) {
@@ -66,15 +75,20 @@ class Player {
 class Deck {
     constructor() { this.cards = []; }
     drawOne() {
-        return new Card(1);
+        return new Card(1, this.getRandomInt(200));
+    }
+
+    getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
     }
 }
 
 class Card {
-    constructor(steps) {
+    constructor(steps, priority) {
         this.uuid = uuid();
         this.steps = steps;
         this.action = null;
+        this.priority = priority
     }
 }
 
@@ -111,10 +125,10 @@ class Board {
     }
 
     areAllRobotsCommitted() {
-    	let notReady = _.filter(_.map(this.robots, 'robot'), function(robot) {
-    		return _.isEmpty(robot.registers);
-    	});
-    	return _.isEmpty(notReady);
+        let notReady = _.filter(_.map(this.robots, 'robot'), function(robot) {
+            return _.isEmpty(robot.registers);
+        });
+        return _.isEmpty(notReady);
     }
 }
 
@@ -134,7 +148,11 @@ class Robot {
 
     commitRegisters(registers) {
         this.registers = [registers];
-        console.log("Robot says registers " + registers);
+        console.log("Robot says registers " + JSON.stringify(registers));
+    }
+
+    clearRegisters() {
+        this.registers = [];
     }
 }
 
