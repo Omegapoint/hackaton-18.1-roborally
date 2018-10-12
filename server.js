@@ -2,7 +2,8 @@ const express = require('express');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+var _ = require('lodash');
+var uuid = require('uuid/v4');
 let rooms = {};
 
 app.use(express.static('.'));
@@ -11,49 +12,101 @@ app.get('/', function(req, res) {
     res.sendFile(__dirname + '/app/index.html');
 });
 
+class Director {
+    constructor(board) {
+        this.board = board;
+        this.players = {};
+    }
+
+    addPlayer(playerName, socket) {
+        console.log(`${playerName} joined`);
+        let robot = new Robot(playerName);
+        this.players[playerName] = 
+            new Player(playerName,socket)
+        ;
+        this.board.addRobot(robot);
+    }
+
+    deal() {
+        _.forEach(this.players, function(player) {
+            player.receiveCards([new Card(1), new Card(0), new Card(1)]);
+        });
+    }
+}
+
+class Player {
+	constructor(name, socket){
+		this.name=name;
+		this.socket=socket;
+		this.socket.on('commitRegisters', (data)=> { this.commitRegisters(data);});
+	}
+
+	receiveCards(cards){
+		this.socket.emit("give", cards);
+	}
+
+	commitRegisters(data){
+		console.log("commitRegisters "+JSON.stringify(data));
+	}
+
+
+}
+class Deck {
+    constructor() { this.cards = []; }
+    drawOne() {
+        return new Card(1);
+    }
+}
+
+class Card {
+    constructor(steps) {
+    	this.uuid = uuid();
+        this.steps = steps;
+        this.action = null;
+    }
+}
 
 class Board {
-
     constructor() {
         this.size_x = 5;
         this.size_y = 5;
         this.next_pos = 0;
-        this.robots = {};
-
+        this.robots={};
         console.log('Game created');
     }
 
-    addPlayer(playerName) {
-        console.log(`${playerName} joined`);
-        let r = new Robot();
+    addRobot(robot) {
+        console.log(`${robot.playerName}s robot added`);
+        
         let position = this.findFreePosition();
-        this.robots[playerName] = {
-        	position: position,
-        	robot: r
+        this.robots[robot.playerName] = {
+            position,
+            robot
         };
         this.printBoard();
     }
 
     findFreePosition() {
-    	return new Position(this.next_pos++, 0);
+        return new Position(this.next_pos++, 0);
     }
 
     printBoard() {
-    	console.log(JSON.stringify(this));
+        console.log(JSON.stringify(this));
     }
 }
 
 class Position {
-	constructor(x, y) {
-		this.x = x;
-		this.y = y;
-	}
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
 }
 
 class Robot {
-	constructor() {
-		this.avatar = '/app/images/duck.png';
-	}
+    constructor(playerName) {
+        this.avatar = '/app/images/duck.png';
+        this.playerName = playerName;
+    }
 }
 
 io.on('connection', (socket) => {
@@ -62,10 +115,12 @@ io.on('connection', (socket) => {
     socket.on('createGame', (data) => {
         let roomId = `room-0`;
         let board = new Board();
-        board.addPlayer(data.name);
+        let director = new Director(board);
+        director.addPlayer(data.name, socket);
 
         rooms[roomId] = {
-            board
+            board,
+            director
         };
 
         socket.join(roomId);
@@ -78,7 +133,7 @@ io.on('connection', (socket) => {
 
         var room = io.nsps['/'].adapter.rooms[data.room];
         if (room) {
-        	rooms[data.room].board.addPlayer(data.name);
+            rooms[data.room].board.addPlayer(data.name);
             socket.join(data.room);
             socket.emit('newGame', { name: data.name, room: data.room });
             io.to(data.room).emit('playerJoined', {
@@ -97,6 +152,7 @@ io.on('connection', (socket) => {
             room: data.room,
             board: rooms[data.room].board
         });
+        rooms[data.room].director.deal();
     });
 });
 

@@ -59,8 +59,7 @@
     // New Game created by current client. Update the UI and create new Game var.
     socket.on('newGame', (data) => {
         const message =
-            `Hello, ${data.name}. Please ask your friend to enter Game ID: 
-      ${data.room}. Waiting for player 2...`;
+            `Hello, ${data.name}. Please ask your friend to enter Game ID: ${data.room}. Waiting for player 2...`;
 
         $('.lobby').css('display', 'none');
         $('.waiting').css('display', 'block');
@@ -78,6 +77,12 @@
         $('#userHello').html("Nu kör vi!");
 
     });
+
+    socket.on('give', (data) => {
+        console.log("give " + JSON.stringify(data));
+    });
+
+
     /**
      * If player creates the game, he'll be P1(X) and has the first turn.
      * This event is received when opponent connects to the room.
