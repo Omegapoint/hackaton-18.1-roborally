@@ -16,6 +16,7 @@ class Director {
     constructor(board) {
         this.board = board;
         this.players = {};
+        this.deck = new Deck();
     }
 
     addPlayer(playerName, socket) {
@@ -30,7 +31,7 @@ class Director {
         let director = this;
         _.forEach(this.players, function(player) {
             board.robots[player.name].robot.clearRegisters();
-            player.receiveCards([new Card(1, director.getRandomInt(200)), new Card(0, director.getRandomInt(200)), new Card(1, director.getRandomInt(200))]);
+            player.receiveCards(director.deck.drawCards(3));
         });
     }
 
@@ -60,7 +61,9 @@ class Director {
                 player.announceWinner(winner);
             });
             // TODO: kill everything
+            return;
         }
+        this.deal();
     }
 }
 
@@ -99,6 +102,13 @@ class Deck {
     constructor() { this.cards = []; }
     drawOne() {
         return new Card(1, this.getRandomInt(200));
+    }
+
+    drawCards(number) {
+    	let deck = this;
+    	return _.map(_.range(number), () => {
+    		return new Card(deck.getRandomInt(3), deck.getRandomInt(200));
+    	});
     }
 
     getRandomInt(max) {
