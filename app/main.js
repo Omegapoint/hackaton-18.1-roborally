@@ -56,6 +56,11 @@
         socket.emit('startGame', { room: roomId });
     });
 
+    $('#commitRegisters').on('click', () => {
+      const registers = $('#registers').val();
+        socket.emit('commitRegisters', { registers: registers });
+    });
+
     // New Game created by current client. Update the UI and create new Game var.
     socket.on('newGame', (data) => {
         const message =
@@ -79,55 +84,9 @@
     });
 
     socket.on('give', (data) => {
-        console.log("give " + JSON.stringify(data));
+        $('#cards').html(JSON.stringify(data));
     });
 
-
-    /**
-     * If player creates the game, he'll be P1(X) and has the first turn.
-     * This event is received when opponent connects to the room.
-     */
-    socket.on('player1', (data) => {
-        const message = `Hello, ${player.getPlayerName()}`;
-        $('#userHello').html(message);
-        player.setCurrentTurn(true);
-    });
-
-    /**
-     * Joined the game, so player is P2(O). 
-     * This event is received when P2 successfully joins the game room. 
-     */
-    socket.on('player2', (data) => {
-        const message = `Hello, ${data.name}`;
-
-        // Create game for player 2
-        game = new Game(data.room);
-        game.displayBoard(message);
-        player.setCurrentTurn(false);
-    });
-
-    /**
-     * Opponent played his turn. Update UI.
-     * Allow the current player to play now. 
-     */
-    socket.on('turnPlayed', (data) => {
-        const row = data.tile.split('_')[1][0];
-        const col = data.tile.split('_')[1][1];
-        const opponentType = player.getPlayerType() === P1 ? P2 : P1;
-
-        game.updateBoard(opponentType, row, col, data.tile);
-        player.setCurrentTurn(true);
-    });
-
-    // If the other player wins, this event is received. Notify user game has ended.
-    socket.on('gameEnd', (data) => {
-        game.endGame(data.message);
-        socket.leave(data.room);
-    });
-
-    /**
-     * End the game on any err event. 
-     */
     socket.on('err', (data) => {
         game.endGame(data.message);
     });

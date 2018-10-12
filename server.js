@@ -20,10 +20,8 @@ class Director {
 
     addPlayer(playerName, socket) {
         console.log(`${playerName} joined`);
+        this.players[playerName] = new Player(playerName, socket, this);
         let robot = new Robot(playerName);
-        this.players[playerName] = 
-            new Player(playerName,socket)
-        ;
         this.board.addRobot(robot);
     }
 
@@ -32,25 +30,39 @@ class Director {
             player.receiveCards([new Card(1), new Card(0), new Card(1)]);
         });
     }
+
+    readyPlayer(player, registers) {
+    	console.log("Ready player " + player.name);
+        this.board.commitRegisters(player.name, registers);
+        if (this.board.areAllRobotsCommitted()) {
+        	console.log("All players are ready");
+        } else {
+        	console.log("Not all players are ready");
+        }
+    }
 }
 
 class Player {
-	constructor(name, socket){
-		this.name=name;
-		this.socket=socket;
-		this.socket.on('commitRegisters', (data)=> { this.commitRegisters(data);});
-	}
+    constructor(name, socket, director) {
+        this.name = name;
+        this.socket = socket;
+        this.director = director;
 
-	receiveCards(cards){
-		this.socket.emit("give", cards);
-	}
+        this.socket.on('commitRegisters', (data) => {
+            this.commitRegisters(data);
+        });
+    }
 
-	commitRegisters(data){
-		console.log("commitRegisters "+JSON.stringify(data));
-	}
+    receiveCards(cards) {
+        this.socket.emit("give", cards);
+    }
 
-
+    commitRegisters(data) {
+        console.log("commitRegisters " + JSON.stringify(data));
+        this.director.readyPlayer(this, data.registers);
+    }
 }
+
 class Deck {
     constructor() { this.cards = []; }
     drawOne() {
@@ -60,7 +72,7 @@ class Deck {
 
 class Card {
     constructor(steps) {
-    	this.uuid = uuid();
+        this.uuid = uuid();
         this.steps = steps;
         this.action = null;
     }
@@ -71,13 +83,13 @@ class Board {
         this.size_x = 5;
         this.size_y = 5;
         this.next_pos = 0;
-        this.robots={};
+        this.robots = {};
         console.log('Game created');
     }
 
     addRobot(robot) {
         console.log(`${robot.playerName}s robot added`);
-        
+
         let position = this.findFreePosition();
         this.robots[robot.playerName] = {
             position,
@@ -93,6 +105,17 @@ class Board {
     printBoard() {
         console.log(JSON.stringify(this));
     }
+
+    commitRegisters(playerName, registers) {
+        this.robots[playerName].robot.commitRegisters(registers);
+    }
+
+    areAllRobotsCommitted() {
+    	let notReady = _.filter(_.map(this.robots, 'robot'), function(robot) {
+    		return _.isEmpty(robot.registers);
+    	});
+    	return _.isEmpty(notReady);
+    }
 }
 
 class Position {
@@ -106,6 +129,12 @@ class Robot {
     constructor(playerName) {
         this.avatar = '/app/images/duck.png';
         this.playerName = playerName;
+        this.registers = [];
+    }
+
+    commitRegisters(registers) {
+        this.registers = [registers];
+        console.log("Robot says registers " + registers);
     }
 }
 
@@ -133,7 +162,7 @@ io.on('connection', (socket) => {
 
         var room = io.nsps['/'].adapter.rooms[data.room];
         if (room) {
-            rooms[data.room].board.addPlayer(data.name);
+            rooms[data.room].director.addPlayer(data.name, socket);
             socket.join(data.room);
             socket.emit('newGame', { name: data.name, room: data.room });
             io.to(data.room).emit('playerJoined', {
