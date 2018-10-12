@@ -51,7 +51,9 @@ class Position {
 }
 
 class Robot {
-
+	constructor() {
+		this.avatar = '/app/images/duck.png';
+	}
 }
 
 io.on('connection', (socket) => {
@@ -78,7 +80,7 @@ io.on('connection', (socket) => {
         if (room) {
         	rooms[data.room].board.addPlayer(data.name);
             socket.join(data.room);
-            socket.emit('newGame', { name: data.name, room: `room-${rooms}` });
+            socket.emit('newGame', { name: data.name, room: data.room });
             io.to(data.room).emit('playerJoined', {
                 room: data.room,
                 player: data.name

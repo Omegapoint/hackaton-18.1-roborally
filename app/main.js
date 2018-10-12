@@ -10,16 +10,20 @@
     function initBoard(board) {
         console.log("Init board: " + JSON.stringify(board));
 
-        for (y = board.size_y - 1; y >=0; y--) {
+        for (y = board.size_y - 1; y >= 0; y--) {
             let row = $('<div class="row"></div>');
             $('#factoryFloor').append(row);
             for (x = 0; x < board.size_x; x++) {
-                row.append(`<div class="tile" id="${x},${y}">[${x},${y}]</div>`);
+                row.append(`<div class="tile" id="tile-${x}-${y}">[${x},${y}]</div>`);
             }
         }
     }
 
     function updateBoard(board) {
+        _.forEach(board.robots, function(r) {
+            console.log("Robot: " + JSON.stringify(r));
+            $(`#tile-${r.position.x}-${r.position.y}`).html(`<img class="robot" id="${r}" src="${r.robot.avatar}"/>`);
+        });
 
     }
 
@@ -68,6 +72,7 @@
     // New Game created by current client. Update the UI and create new Game var.
     socket.on('gameOn', (data) => {
         initBoard(data.board);
+        updateBoard(data.board);
         $('.waiting').css('display', 'none');
         $('.gameBoard').css('display', 'block');
         $('#userHello').html("Nu kör vi!");
